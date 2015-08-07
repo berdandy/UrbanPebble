@@ -1,0 +1,23 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        ""
+    ],
+    "companyName": "andy@berdan.ca",
+    "longName": "Random Urban Dictionary on Pebble",
+    "projectType": "native",
+    "resources": {
+        "media": []
+    },
+    "sdkVersion": "3",
+    "shortName": "UrbanPebble",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
+    "uuid": "583b7e9b-3b4c-4075-b925-13689b1b9dd9",
+    "versionLabel": "0.1",
+    "watchapp": {
+        "watchface": false
+    }
+}
