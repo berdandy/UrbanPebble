@@ -7,44 +7,50 @@ var xhrRequest = function (url, type, callback) {
   xhr.send();
 };
 
-function udRandom() {
+function getRandom() {
   // get a random pile of definitions. Returns 10, currently.
   var url = 'http://api.urbandictionary.com/v0/random';
   xhrRequest(url, 'GET', 
     function(responseText) {
-      var json = JSON.parse(responseText);
-		console.log('UD says: ' + json);
+		var data = JSON.parse(responseText);
 		
-		// Assemble dictionary using our keys
-// var dictionary = {
-// 	'KEY_WORD: word,
-// 	'KEY_DEFINITION': definition,
-// 	'KEY_EXAMPLE': example,
-// };
+		var term = data.list[0];
+		var word = term.word;
+		var definition = term.definition;
+		var example = term.example;
+		
+		console.log("GOT FROM UD: " + word + " :: " + definition + " :: " + example);
+		
+		var returnMessage = {
+			'KEY_WORD': word,
+			'KEY_DEFINITION': definition,
+			'KEY_EXAMPLE': example,
+		};
+		Pebble.sendAppMessage(returnMessage,
+			function(e) {
+				console.log('UD term sent to Pebble successfully!');
+			},
+			function(e) {
+				console.log('Error sending UD term to Pebble!');
+			}
+		);
 
-// // Send to Pebble
-// Pebble.sendAppMessage(dictionary,
-//   function(e) {
-//     console.log('Weather info sent to Pebble successfully!');
-//   },
-//   function(e) {
-//     console.log('Error sending weather info to Pebble!');
-//   }
-// );
-    }      
+	}
   );
 }
 
 // Listen for when the watchface is opened
 Pebble.addEventListener('ready', 
   function(e) {
-    console.log('PebbleKit JS ready!');
+    console.log('Fetching first term');
+	getRandom();
   }
 );
 
 // Listen for when an AppMessage is received
 Pebble.addEventListener('appmessage',
-  function(e) {
-    console.log('AppMessage received!');
+	function(e) {
+		console.log('Refreshing term');
+		getRandom();
   }                     
 );

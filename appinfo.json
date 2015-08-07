@@ -1,5 +1,9 @@
 {
-    "appKeys": {},
+    "appKeys": {
+        "KEY_DEFINITION": 1,
+        "KEY_EXAMPLE": 2,
+        "KEY_WORD": 0
+    },
     "capabilities": [
         ""
     ],

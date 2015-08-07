@@ -1,7 +1,7 @@
 #include <pebble.h>
 	
 #define KEY_WORD 0
-#define KEY_DEFINTION 1
+#define KEY_DEFINITION 1
 #define KEY_EXAMPLE 2
 
 static Window *window;
@@ -9,24 +9,27 @@ static Window *window;
 static ScrollLayer *s_scroll_layer;
 static TextLayer *text_layer;
 
+static char ud_word_buffer[32];
+static char ud_definition_buffer[1024];
+static char ud_example_buffer[1024];
+static char ud_term_buffer[2048];
+
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-	text_layer_set_text(text_layer, "Select");
+	APP_LOG(APP_LOG_LEVEL_INFO, "WAT");
 	
-	/* TODO: load random urban dictionary definition */
+	// Begin dictionary
+	DictionaryIterator *iter;
+	app_message_outbox_begin(&iter);
+
+	// Add a key-value pair
+	dict_write_uint8(iter, 0, 0);
+
+	// Send the message!
+	app_message_outbox_send();
 }
-
-// static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-// 	text_layer_set_text(text_layer, "Up");
-// }
-
-// static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
-// 	text_layer_set_text(text_layer, "Down");
-// }
 
 static void click_config_provider(void *context) {
 	window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
-	// window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
-	// window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
 }
 
 static void window_load(Window *window) {
@@ -40,11 +43,11 @@ static void window_load(Window *window) {
 	text_layer = text_layer_create(max_text_bounds);
 	text_layer_set_text(text_layer, "Press select for a random definiton");
 	// text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
-	text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+	text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
 	
-	GSize max_size = text_layer_get_content_size(text_layer);
-	text_layer_set_size(text_layer, max_size);
-	scroll_layer_set_content_size(s_scroll_layer, GSize(bounds.size.w, max_size.h + 4));
+//	GSize max_size = text_layer_get_content_size(text_layer);
+	text_layer_set_size(text_layer, GSize(max_text_bounds.size.w, max_text_bounds.size.h));
+	scroll_layer_set_content_size(s_scroll_layer, GSize(max_text_bounds.size.w, max_text_bounds.size.h+4));
 
 	// Add the layers for display
 	scroll_layer_add_child(s_scroll_layer, text_layer_get_layer(text_layer));
@@ -56,7 +59,37 @@ static void window_unload(Window *window) {
 }
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
+  // Read first item
+  Tuple *t = dict_read_first(iterator);
 
+  // For all items
+  while(t != NULL) {
+    // Which key was received?
+    switch(t->key) {
+    case KEY_WORD:
+		snprintf(ud_word_buffer, sizeof(ud_word_buffer), "%s", t->value->cstring);
+		break;
+    case KEY_DEFINITION:
+		snprintf(ud_definition_buffer, sizeof(ud_definition_buffer), "%s", t->value->cstring);
+		break;
+	case KEY_EXAMPLE:
+		snprintf(ud_example_buffer, sizeof(ud_example_buffer), "%s", t->value->cstring);
+		break;
+    default:
+		APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
+		break;
+    }
+	  
+	snprintf(ud_term_buffer, sizeof(ud_term_buffer), "%s\n\n%s\n\n%s",
+			 ud_word_buffer,
+			 ud_definition_buffer,
+			 ud_example_buffer
+	);
+	text_layer_set_text(text_layer, ud_term_buffer);
+
+    // Look for next item
+    t = dict_read_next(iterator);
+  }
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
