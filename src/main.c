@@ -3,19 +3,26 @@
 #define KEY_WORD 0
 #define KEY_DEFINITION 1
 #define KEY_EXAMPLE 2
+	
+#define FONT_INSTRUCTIONS FONT_KEY_GOTHIC_24
+#define FONT_DICTIONARY FONT_KEY_GOTHIC_18
 
 static Window *window;
 
 static ScrollLayer *s_scroll_layer;
 static TextLayer *text_layer;
 
-static char ud_word_buffer[32];
+static char ud_word_buffer[128];
 static char ud_definition_buffer[1024];
 static char ud_example_buffer[1024];
 static char ud_term_buffer[2048];
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-	APP_LOG(APP_LOG_LEVEL_INFO, "WAT");
+	snprintf(ud_term_buffer, sizeof(ud_term_buffer), "Loading...");
+	text_layer_set_size(text_layer, GSize(144, 168));
+	scroll_layer_set_content_size(s_scroll_layer, GSize(144, 168));
+	text_layer_set_text(text_layer, ud_term_buffer);
+	scroll_layer_set_content_offset(s_scroll_layer, GPointZero, false);
 	
 	// Begin dictionary
 	DictionaryIterator *iter;
@@ -29,8 +36,6 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 }
 
 static void click_config_provider(void *context) {
-	APP_LOG(APP_LOG_LEVEL_INFO, "SET UP CONFIG");
-	
 	window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
 }
 
@@ -45,12 +50,10 @@ static void window_load(Window *window) {
 	
 	text_layer = text_layer_create(max_text_bounds);
 	text_layer_set_overflow_mode(text_layer, GTextOverflowModeWordWrap);
-	text_layer_set_text(text_layer, "Press select for a random definiton");
-	text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
-	
-	GSize content_size = text_layer_get_content_size(text_layer);
-	text_layer_set_size(text_layer, GSize(max_text_bounds.size.w, content_size.h));
-	scroll_layer_set_content_size(s_scroll_layer, GSize(bounds.size.w, max_text_bounds.size.h+4));
+	text_layer_set_text(text_layer, "WARNING: URBAN DICTIONARY CONTAINS ADULT CONTENT\n\nPress SELECT for a random definiton");
+	text_layer_set_font(text_layer, fonts_get_system_font(FONT_INSTRUCTIONS));
+	text_layer_set_size(text_layer, GSize(144, 168));
+	scroll_layer_set_content_size(s_scroll_layer, GSize(144, 168));
 	
 	// Add the layers for display
 	scroll_layer_add_child(s_scroll_layer, text_layer_get_layer(text_layer));
@@ -64,13 +67,13 @@ static void update_layer_sizes_for_content() {
 
 	GSize gr_content_size = graphics_text_layout_get_content_size(
 		ud_term_buffer,
-		fonts_get_system_font(FONT_KEY_GOTHIC_14),
+		fonts_get_system_font(FONT_DICTIONARY),
 		GRect(0,0,144,1000),
 		GTextOverflowModeWordWrap,
 		GTextAlignmentLeft );
 	
 	text_layer_set_text_alignment(text_layer, GTextAlignmentLeft);
-	text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+	text_layer_set_font(text_layer, fonts_get_system_font(FONT_DICTIONARY));
 	text_layer_set_size(text_layer, GSize(max_text_bounds.size.w, gr_content_size.h));
 	scroll_layer_set_content_size(s_scroll_layer, GSize(bounds.size.w, gr_content_size.h+4));
 
@@ -101,13 +104,14 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 		break;
     }
 	  
-	snprintf(ud_term_buffer, sizeof(ud_term_buffer), "%s\n\n%s\n\n%s",
+	snprintf(ud_term_buffer, sizeof(ud_term_buffer), "%s\n\nDefinition:\n%s\n\nExample:\n%s",
 			 ud_word_buffer,
 			 ud_definition_buffer,
 			 ud_example_buffer
 	);
 	text_layer_set_text(text_layer, ud_term_buffer);
 	update_layer_sizes_for_content();
+	scroll_layer_set_content_offset(s_scroll_layer, GPointZero, false);
 
     // Look for next item
     t = dict_read_next(iterator);

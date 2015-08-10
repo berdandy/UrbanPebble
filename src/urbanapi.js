@@ -28,7 +28,7 @@ function getRandom() {
 		};
 		Pebble.sendAppMessage(returnMessage,
 			function(e) {
-				console.log('UD term sent to Pebble successfully!');
+				// console.log('UD term sent to Pebble successfully!');
 			},
 			function(e) {
 				console.log('Error sending UD term to Pebble!');
@@ -42,7 +42,7 @@ function getRandom() {
 // Listen for when the watchface is opened
 Pebble.addEventListener('ready', 
   function(e) {
-    console.log('Fetching first term');
+    // console.log('Fetching first term');
 	// getRandom();
   }
 );
