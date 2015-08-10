@@ -29,29 +29,51 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 }
 
 static void click_config_provider(void *context) {
+	APP_LOG(APP_LOG_LEVEL_INFO, "SET UP CONFIG");
+	
 	window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
 }
 
 static void window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_bounds(window_layer);
-	GRect max_text_bounds = GRect(2, 2, bounds.size.w-2, 2000);
+	GRect max_text_bounds = GRect(2, 2, bounds.size.w-4, 2000);
 	
  	s_scroll_layer = scroll_layer_create(bounds);
 	scroll_layer_set_click_config_onto_window(s_scroll_layer, window);
+	scroll_layer_set_callbacks(s_scroll_layer, (ScrollLayerCallbacks){.click_config_provider=click_config_provider});
 	
 	text_layer = text_layer_create(max_text_bounds);
+	text_layer_set_overflow_mode(text_layer, GTextOverflowModeWordWrap);
 	text_layer_set_text(text_layer, "Press select for a random definiton");
-	// text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
-	text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+	text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
 	
-//	GSize max_size = text_layer_get_content_size(text_layer);
-	text_layer_set_size(text_layer, GSize(max_text_bounds.size.w, max_text_bounds.size.h));
-	scroll_layer_set_content_size(s_scroll_layer, GSize(max_text_bounds.size.w, max_text_bounds.size.h+4));
-
+	GSize content_size = text_layer_get_content_size(text_layer);
+	text_layer_set_size(text_layer, GSize(max_text_bounds.size.w, content_size.h));
+	scroll_layer_set_content_size(s_scroll_layer, GSize(bounds.size.w, max_text_bounds.size.h+4));
+	
 	// Add the layers for display
 	scroll_layer_add_child(s_scroll_layer, text_layer_get_layer(text_layer));
 	layer_add_child(window_layer, scroll_layer_get_layer(s_scroll_layer));
+}
+
+static void update_layer_sizes_for_content() {
+	Layer *window_layer = window_get_root_layer(window);
+	GRect bounds = layer_get_bounds(window_layer);
+	GRect max_text_bounds = GRect(2, 2, bounds.size.w-2, 2000);
+
+	GSize gr_content_size = graphics_text_layout_get_content_size(
+		ud_term_buffer,
+		fonts_get_system_font(FONT_KEY_GOTHIC_14),
+		GRect(0,0,144,1000),
+		GTextOverflowModeWordWrap,
+		GTextAlignmentLeft );
+	
+	text_layer_set_text_alignment(text_layer, GTextAlignmentLeft);
+	text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+	text_layer_set_size(text_layer, GSize(max_text_bounds.size.w, gr_content_size.h));
+	scroll_layer_set_content_size(s_scroll_layer, GSize(bounds.size.w, gr_content_size.h+4));
+
 }
 
 static void window_unload(Window *window) {
@@ -64,7 +86,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 
   // For all items
   while(t != NULL) {
-    // Which key was received?
     switch(t->key) {
     case KEY_WORD:
 		snprintf(ud_word_buffer, sizeof(ud_word_buffer), "%s", t->value->cstring);
@@ -86,6 +107,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 			 ud_example_buffer
 	);
 	text_layer_set_text(text_layer, ud_term_buffer);
+	update_layer_sizes_for_content();
 
     // Look for next item
     t = dict_read_next(iterator);
@@ -107,6 +129,7 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 static void init(void) {
 	window = window_create();
 	window_set_click_config_provider(window, click_config_provider);
+	
 	window_set_window_handlers(window, (WindowHandlers) {
 		.load = window_load,
 		.unload = window_unload,

@@ -43,7 +43,7 @@ function getRandom() {
 Pebble.addEventListener('ready', 
   function(e) {
     console.log('Fetching first term');
-	getRandom();
+	// getRandom();
   }
 );
 

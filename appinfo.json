@@ -8,13 +8,13 @@
         ""
     ],
     "companyName": "andy@berdan.ca",
-    "longName": "Random Urban Dictionary on Pebble",
+    "longName": "Urban Dictionary",
     "projectType": "native",
     "resources": {
         "media": []
     },
     "sdkVersion": "3",
-    "shortName": "UrbanPebble",
+    "shortName": "Urbble",
     "targetPlatforms": [
         "aplite",
         "basalt"
