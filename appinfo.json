@@ -7,11 +7,18 @@
     "capabilities": [
         ""
     ],
-    "companyName": "andy@berdan.ca",
+    "companyName": "Andy Berdan",
     "longName": "Urban Dictionary",
     "projectType": "native",
     "resources": {
-        "media": []
+        "media": [
+            {
+                "file": "images/logo~bw.png",
+                "menuIcon": true,
+                "name": "URBBLE_LOGO",
+                "type": "png"
+            }
+        ]
     },
     "sdkVersion": "3",
     "shortName": "Urbble",
