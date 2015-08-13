@@ -13,9 +13,8 @@
     "resources": {
         "media": [
             {
-                "file": "images/logo~bw.png",
-                "menuIcon": true,
-                "name": "URBBLE_LOGO",
+                "file": "images/logo.png",
+                "name": "IMAGE_MENU_ICON",
                 "type": "png"
             }
         ]
