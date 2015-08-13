@@ -8,13 +8,13 @@
         ""
     ],
     "companyName": "Andy Berdan",
-    "longName": "Urban Dictionary",
+    "longName": "Urbble",
     "projectType": "native",
     "resources": {
         "media": [
             {
-				"menuIcon": true,
                 "file": "images/logo.png",
+                "menuIcon": true,
                 "name": "IMAGE_MENU_ICON",
                 "type": "png"
             }
